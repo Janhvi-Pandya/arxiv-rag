@@ -1,0 +1,12 @@
+# The pipeline (ingest.py + rag.py). Versions pinned so the project keeps working.
+# On a machine without a GPU, install the small CPU-only PyTorch first:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+arxiv==4.0.2
+chromadb==1.5.9
+sentence-transformers==5.1.0
+rank-bm25==0.2.2
+openai==2.54.0
+python-dotenv==1.2.3
+fastapi==0.162.2
+uvicorn==0.54.0
+pydantic==2.13.5

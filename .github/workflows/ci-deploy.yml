@@ -1,0 +1,43 @@
+# On every push: run the tests. On a push to main: if the tests pass,
+# copy the repo to the Hugging Face Space, which rebuilds and redeploys the app.
+name: test and deploy
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies (without the heavy embedding model library)
+        run: |
+          grep -v sentence-transformers requirements.txt > /tmp/requirements-ci.txt
+          pip install -r /tmp/requirements-ci.txt httpx pytest
+      - name: Run tests
+        run: pytest -v
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Push to the Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_USERNAME: ${{ vars.HF_USERNAME }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: |
+          if [ -z "$HF_TOKEN" ] || [ -z "$HF_USERNAME" ] || [ -z "$HF_SPACE" ]; then
+            echo "HF_TOKEN / HF_USERNAME / HF_SPACE not set yet, skipping deploy."
+            exit 0
+          fi
+          git push --force "https://$HF_USERNAME:$HF_TOKEN@huggingface.co/spaces/$HF_USERNAME/$HF_SPACE" HEAD:main

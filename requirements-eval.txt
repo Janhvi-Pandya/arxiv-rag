@@ -1,0 +1,9 @@
+# Only needed for evaluate.py (RAGAS). Kept separate so the deployed app stays small.
+# RAGAS changes its API between versions, so these are pinned to a set tested together.
+-r requirements.txt
+ragas==0.2.15
+langchain==0.3.30
+langchain-core==0.3.86
+langchain-community==0.3.31
+langchain-openai==0.3.35
+datasets==5.1.0
